@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+
+        }
+
+        body {
+            background-color: black;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 30px;
+            color: white;
+            font-family: sans-serif;
+        }
+
+        .mainBox {
+            width: 350px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .box {
+            height: 100px;
+            width: 100px;
+            border: 2px solid coral;
+            transition: 200ms;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 5rem;
+        }
+
+        .box:hover {
+            transform: scale(0.8);
+        }
+
+        .danger {
+            background-color: red;
+        }
+
+        .success {
+            background-color: green;
+        }
+
+        .alert {
+            /* background-color: white; */
+            padding: 1rem 2rem;
+        }
+
+        .d-none {
+            display: none;
+        }
+
+        .playerBox {
+            display: flex;
+            gap: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 
+        step 1 create 9 boxes
+        step 2 selection logic
+        step 3 prevent overwrite
+        step 4 winner logic
+        step 5 draw logic
+        step 6 score logic
+        step 7 reset logic
+     -->
+    <div id="output"></div>
+    <div class="card" id="palyerCard">
+        <input id="player1" value="john" type="text" placeholder="enter player 1 name">
+        <input id="player2" value="kate" type="text" placeholder="enter player 2 name">
+        <button onclick="startGame()">Start Game</button>
+    </div>
+    <div id="gameBox" class="d-none">
+        <div class="playerBox">
+            <h1><span id="p1"></span> : <span id="p1WinCount"></span></h1>
+            <h1><span id="p2"></span> : <span id="p2WinCount"></span></h1>
+            <h1>Draw : <span id="drawCount"></span> </h1>
+            <h1>Total : <span id="total"></span></h1>
+        </div>
+        <div class="mainBox ">
+            <div class="box" id="b1" onclick="handleSelect('b1')"></div>
+            <div class="box" id="b2" onclick="handleSelect('b2')"></div>
+            <div class="box" id="b3" onclick="handleSelect('b3')"></div>
+            <div class="box" id="b4" onclick="handleSelect('b4')"></div>
+            <div class="box" id="b5" onclick="handleSelect('b5')"></div>
+            <div class="box" id="b6" onclick="handleSelect('b6')"></div>
+            <div class="box" id="b7" onclick="handleSelect('b7')"></div>
+            <div class="box" id="b8" onclick="handleSelect('b8')"></div>
+            <div class="box" id="b9" onclick="handleSelect('b9')"></div>
+        </div>
+    </div>
+    <script>
+        let chance = true
+        let player1WinCount = 0
+        let player2WinCount = 0
+        let drawCount = 0
+        let totalCount = 0
+
+        function startGame() {
+
+            let player1 = document.getElementById("player1").value
+            let player2 = document.getElementById("player2").value
+
+            document.getElementById("p1").innerHTML = player1
+            document.getElementById("p2").innerHTML = player2
+
+            document.getElementById("p1WinCount").innerHTML = player1WinCount
+            document.getElementById("p2WinCount").innerHTML = player2WinCount
+            document.getElementById("drawCount").innerHTML = drawCount
+            document.getElementById("total").innerHTML = totalCount
+
+            document.getElementById("gameBox").classList.remove("d-none")
+            document.getElementById("palyerCard").classList.add("d-none")
+
+        }
+        function handleSelect(arg) {
+            let hasDanger = document
+                .getElementById(arg)
+                .classList
+                .contains("danger")
+            let hasSuccess = document
+                .getElementById(arg)
+                .classList
+                .contains("success")
+            if (hasSuccess === false && hasDanger === false) {
+                if (chance) {
+                    document.getElementById(arg).classList.add("danger")
+                    document.getElementById(arg).innerHTML = "X"
+                    chance = false
+                } else {
+                    document.getElementById(arg).classList.add("success")
+                    document.getElementById(arg).innerHTML = "O"
+                    chance = true
+                }
+            }
+            checkDraw()
+        }
+
+        function winner() {
+
+            // let b1HasRed = document.querySelector("#b1").classList.contains("danger")
+            // let b2HasRed = document.querySelector("#b2").classList.contains("danger")
+            // let b3HasRed = document.querySelector("#b3").classList.contains("danger")
+            // if (b1HasRed && b2HasRed && b3HasRed) {
+            //     console.log("Red is winner");
+            // }
+            let rwc1 = checkWinner("b1", "b2", "b3", "danger")
+            let rwc2 = checkWinner("b4", "b5", "b6", "danger")
+            let rwc3 = checkWinner("b7", "b8", "b9", "danger")
+            let rwc4 = checkWinner("b1", "b4", "b7", "danger")
+            let rwc5 = checkWinner("b2", "b5", "b8", "danger")
+            let rwc6 = checkWinner("b3", "b6", "b9", "danger")
+            let rwc7 = checkWinner("b3", "b5", "b7", "danger")
+            let rwc8 = checkWinner("b1", "b5", "b9", "danger")
+            if (rwc1 || rwc2 || rwc3 || rwc4 || rwc5 || rwc6 || rwc7 || rwc8) {
+                document.getElementById("output").innerHTML = `
+                <div class="alert">
+                    <h1>Red Is Winner</h1>
+                </div>
+                `
+                player1WinCount++
+                document.getElementById("p1WinCount").innerHTML = player1WinCount
+                totalCount++
+                document.getElementById("total").innerHTML = totalCount
+                return true
+            }
+            let gwc1 = checkWinner("b1", "b2", "b3", "success")
+            let gwc2 = checkWinner("b4", "b5", "b6", "success")
+            let gwc3 = checkWinner("b7", "b8", "b9", "success")
+            let gwc4 = checkWinner("b1", "b4", "b7", "success")
+            let gwc5 = checkWinner("b2", "b5", "b8", "success")
+            let gwc6 = checkWinner("b3", "b6", "b9", "success")
+            let gwc7 = checkWinner("b3", "b5", "b7", "success")
+            let gwc8 = checkWinner("b1", "b5", "b9", "success")
+            if (gwc1 || gwc2 || gwc3 || gwc4 || gwc5 || gwc6 || gwc7 || gwc8) {
+                document.getElementById("output").innerHTML = `
+                <div class="alert">
+                    <h1>Green Is Winner</h1>
+                </div>
+                `
+                player2WinCount++
+                document.getElementById("p2WinCount").innerHTML = player2WinCount
+                totalCount++
+                document.getElementById("total").innerHTML = totalCount
+                return true
+            }
+
+            return false
+
+
+        }
+        function checkWinner(id1, id2, id3, color) {
+            let box1 = document.getElementById(id1).classList.contains(color)
+            let box2 = document.getElementById(id2).classList.contains(color)
+            let box3 = document.getElementById(id3).classList.contains(color)
+            if (box1 && box2 && box3) {
+                resetGame()
+                return true
+            } else {
+                return false
+            }
+        }
+        function resetGame() {
+            for (let i = 1; i <= 9; i++) {
+                document.getElementById(`b${i}`).classList.remove("danger")
+                document.getElementById(`b${i}`).classList.remove("success")
+                document.getElementById(`b${i}`).innerHTML = ""
+            }
+            chance = true
+        }
+
+        function checkDraw(param) {
+            let arr = []
+            for (let i = 1; i <= 9; i++) {
+                let x = document
+                    .getElementById(`b${i}`)
+                    .classList.contains("danger")
+                let y = document
+                    .getElementById(`b${i}`)
+                    .classList.contains("success")
+                if (x || y) {
+                    arr.push("skillhub")
+                }
+                if (!winner()) {
+                    if (arr.length === 9) {
+                        console.log("match draw");
+                        drawCount++
+                        totalCount++
+                        document.getElementById("total").innerHTML = totalCount
+                        document.getElementById("drawCount").innerHTML = drawCount
+                        document.getElementById("output").innerHTML = "<h1>Match Draw</h1>"
+                        resetGame()
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
